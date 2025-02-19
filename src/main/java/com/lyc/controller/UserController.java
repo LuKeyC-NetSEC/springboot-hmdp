@@ -6,11 +6,10 @@ import com.lyc.dto.Result;
 import com.lyc.entity.UserInfo;
 import com.lyc.service.IUserInfoService;
 import com.lyc.service.IUserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
+import jakarta.annotation.Resource;
 
 /**
  * <p>
