@@ -23,6 +23,13 @@ spring:
 mybatis-plus:
   type-aliases-package: com.lyc.entity # 别名扫描包
 
+# 阿里云短信服务配置
+aliyun:
+  sms:
+    access-key-id:
+    access-key-secret:
+    endpoint: dysmsapi.aliyuncs.com
+
 logging:
   level:
     com.lyc: debug

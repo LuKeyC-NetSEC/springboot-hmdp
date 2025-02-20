@@ -8,6 +8,7 @@ import com.lyc.dto.Result;
 import com.lyc.entity.User;
 import com.lyc.mapper.UserMapper;
 import com.lyc.service.IUserService;
+import com.lyc.service.SmsService;
 import com.lyc.utils.RegexUtils;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private SmsService smsService;
+
     @Override
     public Result sendCode(String phone, HttpSession session) {
         if (RegexUtils.isPhoneInvalid(phone)) {
@@ -39,6 +43,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         session.setAttribute("code", code);
 
         log.debug("发送短信验证码成功，验证码：" + code);
+
+        smsService.sendCode(phone,code);
         return Result.ok();
     }
 
