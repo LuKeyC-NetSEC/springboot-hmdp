@@ -46,7 +46,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
         }
         UserHolder.saveUser(userDTO);
 
-        redisTemplate.expire(key,RedisConstants.LOGIN_USER_TTL, TimeUnit.MINUTES);
+        redisTemplate.expire(key,RedisConstants.LOGIN_USER_TTL, TimeUnit.SECONDS);
         return true;
     }
 
