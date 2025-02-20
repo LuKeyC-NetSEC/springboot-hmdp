@@ -3,6 +3,7 @@ package com.lyc.controller;
 
 import com.lyc.dto.LoginFormDTO;
 import com.lyc.dto.Result;
+import com.lyc.dto.UserDTO;
 import com.lyc.entity.User;
 import com.lyc.entity.UserInfo;
 import com.lyc.service.IUserInfoService;
@@ -64,7 +65,7 @@ public class UserController {
     @GetMapping("/me")
     public Result me(){
         // TODO 获取当前登录的用户并返回
-        User user = UserHolder.getUser();
+        UserDTO user = UserHolder.getUser();
         return Result.ok(user);
     }
 
