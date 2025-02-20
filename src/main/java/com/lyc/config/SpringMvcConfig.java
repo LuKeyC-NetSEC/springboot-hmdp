@@ -33,7 +33,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/user/code",
                         "/user/login",
                         "/blog/hot"
-                );
-        registry.addInterceptor(refreshTokenInterceptor);
+                ).order(1);
+        registry.addInterceptor(refreshTokenInterceptor).addPathPatterns("/**").order(0);
     }
 }
