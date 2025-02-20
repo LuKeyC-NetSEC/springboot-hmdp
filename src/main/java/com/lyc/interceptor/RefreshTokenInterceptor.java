@@ -2,13 +2,10 @@ package com.lyc.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.lyc.dto.UserDTO;
-import com.lyc.entity.User;
 import com.lyc.utils.RedisConstants;
 import com.lyc.utils.UserHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -26,15 +23,30 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  */
 @Component
-public class LoginInterceptor implements HandlerInterceptor {
+public class RefreshTokenInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        UserDTO userDTO = UserHolder.getUser();
+        String token = request.getHeader("authorization");
+        if (token.isBlank()){
+            return true;
+        }
+        String key = RedisConstants.LOGIN_USER_KEY + token;
+        Map<Object, Object> userMap = redisTemplate.opsForHash().entries(key);
+        if (userMap.isEmpty()){
+            return true;
+        }
+        UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap, new UserDTO(), false);
         if (userDTO == null){
             response.setStatus(401);
             return false;
         }
+        UserHolder.saveUser(userDTO);
+
+        redisTemplate.expire(key,RedisConstants.LOGIN_USER_TTL, TimeUnit.MINUTES);
         return true;
     }
 

@@ -1,6 +1,7 @@
 package com.lyc.config;
 
 import com.lyc.interceptor.LoginInterceptor;
+import com.lyc.interceptor.RefreshTokenInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -19,6 +20,9 @@ public class SpringMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LoginInterceptor loginInterceptor;
 
+    @Autowired
+    private RefreshTokenInterceptor refreshTokenInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor)
@@ -30,5 +34,6 @@ public class SpringMvcConfig implements WebMvcConfigurer {
                         "/user/login",
                         "/blog/hot"
                 );
+        registry.addInterceptor(refreshTokenInterceptor);
     }
 }
