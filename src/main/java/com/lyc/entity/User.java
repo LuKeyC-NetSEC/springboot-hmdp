@@ -37,7 +37,7 @@ public class User implements Serializable {
     /**
      * 手机号码
      */
-    @TableId(value = "phone")
+    @TableField(value = "phone")
     private String phone;
 
     /**
@@ -49,27 +49,27 @@ public class User implements Serializable {
     /**
      * 昵称，默认是随机字符
      */
-    @TableId(value = "nick_name")
+    @TableField(value = "nick_name")
     private String nickName;
 
     /**
      * 用户头像
      */
-    @TableId(value = "nick_name")
+    @TableField(value = "nick_name")
     private String icon = "";
 
     /**
      * 创建时间
      */
     @JsonIgnore
-    @TableId(value = "create_time")
+    @TableField(value = "create_time")
     private LocalDateTime createTime;
 
     /**
      * 更新时间
      */
     @JsonIgnore
-    @TableId(value = "update_time")
+    @TableField(value = "update_time")
     private LocalDateTime updateTime;
 
 

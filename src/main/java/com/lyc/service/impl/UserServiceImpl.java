@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lyc.dto.LoginFormDTO;
 import com.lyc.dto.Result;
+import com.lyc.dto.UserDTO;
 import com.lyc.entity.User;
 import com.lyc.mapper.UserMapper;
 import com.lyc.service.IUserService;
@@ -12,6 +13,7 @@ import com.lyc.service.SmsService;
 import com.lyc.utils.RegexUtils;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -84,8 +86,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user == null) {
             return Result.fail("手机号或密码不正确");
         }
-
-        session.setAttribute("user",user);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(user,userDTO);
+        session.setAttribute("user",userDTO);
         return Result.ok();
     }
 }
