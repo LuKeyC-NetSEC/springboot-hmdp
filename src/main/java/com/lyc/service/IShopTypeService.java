@@ -1,5 +1,6 @@
 package com.lyc.service;
 
+import com.lyc.dto.Result;
 import com.lyc.entity.ShopType;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IShopTypeService extends IService<ShopType> {
 
+    Result queryTypeList();
 }
