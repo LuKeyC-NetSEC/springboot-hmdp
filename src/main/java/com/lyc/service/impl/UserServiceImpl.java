@@ -12,6 +12,7 @@ import com.lyc.entity.User;
 import com.lyc.mapper.UserMapper;
 import com.lyc.service.IUserService;
 import com.lyc.service.SmsService;
+import com.lyc.utils.JwtUtil;
 import com.lyc.utils.RedisConstants;
 import com.lyc.utils.RegexUtils;
 import jakarta.servlet.http.HttpSession;
@@ -105,14 +106,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(user, userDTO);
 
-        String token = UUID.randomUUID().toString();
         Map<String, Object> map = BeanUtil.beanToMap(userDTO,new HashMap<>(),
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName,fieldValue) -> fieldValue.toString()));
-        redisTemplate.opsForHash().putAll(RedisConstants.LOGIN_USER_KEY + token, map);
-        redisTemplate.expire(RedisConstants.LOGIN_USER_KEY + token , RedisConstants.LOGIN_USER_TTL ,TimeUnit.MINUTES );
+        String token = getJwtToken(map);
 //        session.setAttribute("user", userDTO);
         return Result.ok(token);
+    }
+
+    private String getJwtToken(Map<String, Object> map) {
+        String token = JwtUtil.createToken(map);
+        String userId = map.get("id").toString();
+        redisTemplate.opsForValue().set(RedisConstants.LOGIN_USER_KEY + userId ,token,RedisConstants.LOGIN_USER_TTL , TimeUnit.SECONDS);
+        return token;
     }
 }
