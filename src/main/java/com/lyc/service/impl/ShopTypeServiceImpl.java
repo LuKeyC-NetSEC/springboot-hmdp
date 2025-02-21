@@ -1,6 +1,9 @@
 package com.lyc.service.impl;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lyc.dto.Result;
 import com.lyc.entity.ShopType;
 import com.lyc.mapper.ShopTypeMapper;
@@ -29,6 +32,9 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private ShopTypeMapper shopTypeMapper;
+
     @Override
     public Result queryTypeList() {
         List<String> shopTypes = redisTemplate.opsForList().range(RedisConstants.CACHE_SHOP_TYPE_KEY, 0, -1);
@@ -41,7 +47,7 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
             return Result.ok(result);
         }
 
-        List<ShopType> result = query().orderByAsc("sort").list();
+        List<ShopType> result = shopTypeMapper.selectList(Wrappers.<ShopType>query().orderByAsc("sort"));
         if (result.isEmpty()){
             return Result.fail("店铺类型不存在");
         }
