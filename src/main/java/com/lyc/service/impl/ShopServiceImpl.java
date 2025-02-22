@@ -52,25 +52,29 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      * @return Shop 店铺信息
      */
     public Shop queryWithMutex(Long id){
+        //1.读取缓存
         String shopJson = redisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
+        //2.缓存命中对象直接返回
         if (StrUtil.isNotBlank(shopJson)) {
             return JSONUtil.toBean(shopJson, Shop.class);
         }
+        //3.缓存命中空对象
         if (shopJson != null){
             //命中空对象 返回错误信息
             return null;
         }
-        //缓存重建
-        //获取互斥锁
+        //4.未拿从缓存中拿到数据 进行缓存重建
+        //4.1 获取互斥锁
         boolean isLock = tryLock(RedisConstants.LOCK_SHOP_KEY + id);
         Shop shop = null;
         try {
+            //4.2 判断是否拿到锁
             if (!isLock){
-                //失败则休眠
+                //4.3 失败则休眠
                 Thread.sleep(50);
                 return queryWithMutex(id);
             }
-
+            //再次读取缓存 二次验证
             shopJson = redisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
             if (StrUtil.isNotBlank(shopJson)) {
                 return JSONUtil.toBean(shopJson, Shop.class);
@@ -79,15 +83,15 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
                 //命中空对象 返回错误信息
                 return null;
             }
-
+            //4.4 从数据库中获取数据
             shop = getById(id);
             if (shop == null){
-                //数据不存在 将空值写入Redis 添加空对象
+                //4.4.1 数据不存在 将空值写入Redis 添加空对象
                 redisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY + id,"",RedisConstants.CACHE_NULL_TTL, TimeUnit.MINUTES);
                 //返回错误信息
                 return null;
             }
-
+            //4.5 数据存在写入缓存
             redisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY + id,JSONUtil.toJsonStr(shop),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
