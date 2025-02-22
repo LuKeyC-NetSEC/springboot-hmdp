@@ -10,6 +10,9 @@ import com.lyc.utils.RedisConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -25,6 +28,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private ShopMapper shopMapper;
+
     @Override
     public Result queryById(Long id) {
         String shopJson = redisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
@@ -38,8 +44,23 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return Result.fail("店铺不存在");
         }
 
-        redisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY + id,JSONUtil.toJsonStr(shop));
+        redisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY + id,JSONUtil.toJsonStr(shop),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
 
         return Result.ok(shop);
+    }
+
+    @Override
+    @Transactional
+    public Result updateShop(Shop shop) {
+        Long id = shop.getId();
+        if (id == null){
+            return Result.fail("店铺ID不能为空");
+        }
+        //1.更新数据库
+        shopMapper.updateById(shop);
+        //2.删除缓存
+        redisTemplate.delete(RedisConstants.CACHE_SHOP_KEY + id);
+
+        return Result.ok();
     }
 }
