@@ -1,5 +1,6 @@
 package com.lyc.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.lyc.dto.Result;
 import com.lyc.entity.Shop;
@@ -34,13 +35,20 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Override
     public Result queryById(Long id) {
         String shopJson = redisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
-        if (shopJson != null) {
+        if (StrUtil.isNotBlank(shopJson)) {
             Shop shop = JSONUtil.toBean(shopJson, Shop.class);
             return Result.ok(shop);
+        }
+        if (shopJson != null){
+            //命中空对象 返回错误信息
+            return Result.fail("店铺不存在");
         }
 
         Shop shop = getById(id);
         if (shop == null){
+            //数据不存在 将空值写入Redis 添加空对象
+            redisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY + id,"",RedisConstants.CACHE_NULL_TTL, TimeUnit.MINUTES);
+            //返回错误信息
             return Result.fail("店铺不存在");
         }
 
